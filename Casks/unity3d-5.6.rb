@@ -7,16 +7,17 @@ cask 'unity3d-5.6' do
 
   preflight do
     FileUtils.cd staged_path do
-      FileUtils.mkdir_p ["tmp"]
+      FileUtils.mkdir_p ["tmp", "/Applications/Unity-5.6"]
       system_command '/usr/bin/xar', args: ['-xf', "Unity-#{version.before_comma}.pkg", '-C', "tmp"]
       Dir.glob("tmp/*.pkg.tmp/**/Payload").each do |p|
         system_command '/usr/bin/tar', args: ['-C', '.', '-zmxf', p]
       end
-      FileUtils.rm_rf ["tmp", "/Applications/Unity-5.6"]
-      FileUtils.ln_sf(File.join(staged_path.to_s, "Unity"), "/Applications/Unity-5.6")
+      FileUtils.rm_rf ["tmp"]
+      FileUtils.mv Dir.glob('Unity/*'), "/Applications/Unity-5.6", :force => true
     end
   end
 
-  uninstall delete:  "/Applications/Unity-5.6/Unity.app/",
-            rmdir:   "/Applications/Unity-5.6"
+  uninstall_preflight do
+    FileUtils.rm_rf ["/Applications/Unity-5.6"]
+  end
 end
